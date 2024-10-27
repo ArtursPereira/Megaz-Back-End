@@ -1,6 +1,7 @@
 package com.project.megaz.controllers;
 
 
+import com.project.megaz.dto.UserLogin;
 import com.project.megaz.dto.UserRegister;
 import com.project.megaz.entity.User;
 import com.project.megaz.repository.UserRepository;
@@ -9,6 +10,7 @@ import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.ModelAndView;
 //Essa anotação informa que se trata de um controller, assim o sistema prepara algumas especificações como o  getmapping.
@@ -37,23 +39,53 @@ public class UserController {
 
 
     @GetMapping("/user/register")
-    public ModelAndView Novo() {
-        return new ModelAndView("/user/register");
+    public ModelAndView Novo(UserRegister request) {
+        return new ModelAndView("user/register");
     }
 
     //Postmapping É usado quando você quer passar dados, nesse caso o register.
     @PostMapping("/user")
-    public String Create(@Valid UserRegister request, BindingResult bindingResult) {
+    public ModelAndView Create(@Valid @ModelAttribute("userRegister") UserRegister request, BindingResult bindingResult) {
         if(bindingResult.hasErrors()){
-            System.out.println("Jenio");
-            return "redirect:/user/register";
+            ModelAndView mv = new ModelAndView("user/register");
+            mv.addObject("usuario", request);
+            return mv;
         }
         else{
             User user = request.ToUser();
             this.userRepository.save(user);
-            return "redirect:/user";
+            return new ModelAndView("redirect:/user");
+        }
+    }
+
+    @GetMapping("/user/login")
+    public ModelAndView Login() {
+        ModelAndView modelAndView = new ModelAndView("user/login");
+        modelAndView.addObject("userLogin", new UserLogin()); // Cria um novo objeto UserLogin
+        return modelAndView;
+    }
+
+    @PostMapping("/login")
+    public ModelAndView Logar(@Valid @ModelAttribute("userLogin")UserLogin login, BindingResult bindingResult) {
+        ModelAndView mv = new ModelAndView();
+        if(bindingResult.hasErrors()){
+             mv.setViewName("user/register");
+            mv.addObject("usuario", login);
+            return mv;
+        }
+        User user = userService.login(login);
+        if(user != null){
+            mv.setViewName("redirect:/user");
+        }
+        else{
+
+            bindingResult.rejectValue("email", "error.userLogin", "Email ou senha inválidos");
+            mv.setViewName("user/login"); // Retorna à página de login
+            mv.addObject("userLogin", login); // Retorna o objeto login para preencher os campos
         }
 
-        //redict Significa que quando você terminar o que tem que fazer ele vai ser direcionado para a página user.
+
+        ModelAndView modelAndView = new ModelAndView("redirect:/user");
+        return modelAndView;
     }
 }

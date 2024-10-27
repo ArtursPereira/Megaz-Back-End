@@ -1,10 +1,9 @@
 package com.project.megaz.entity;
 
-
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.stereotype.Indexed;
+
 
 import java.util.List;
 
@@ -13,11 +12,11 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @NotNull
-    @NotBlank
+    @NotNull(message = "Error")
+    @NotBlank(message = "Error")
     private String name;
-    @NotNull
-    @NotBlank
+    @NotNull(message = "Error")
+    @NotBlank(message = "Error")
     @Column(unique = true)
     //Unique diz que o atributo email deve ser único, ou seja não pode ter dois emails igual carregados no banco de dados
     private String email;
@@ -28,10 +27,6 @@ public class User {
     @Column(nullable = false)
     private int idade;
 
-
-    public void setComments(List<Comment> comments) {
-        this.comments = comments;
-    }
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     private List<Post> posts;
@@ -63,6 +58,11 @@ public class User {
 
     public List<Post> getPosts() {
         return posts;
+    }
+
+
+    public void setComments(List<Comment> comments) {
+        this.comments = comments;
     }
 
     public void setPosts(List<Post> posts) {
