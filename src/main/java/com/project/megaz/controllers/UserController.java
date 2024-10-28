@@ -1,17 +1,22 @@
 package com.project.megaz.controllers;
 
 
+import com.project.megaz.dto.DTOPost;
 import com.project.megaz.dto.UserLogin;
 import com.project.megaz.dto.UserRegister;
 import com.project.megaz.entity.User;
 import com.project.megaz.repository.UserRepository;
 import com.project.megaz.services.UserService;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.servlet.ModelAndView;
 //Essa anotação informa que se trata de um controller, assim o sistema prepara algumas especificações como o  getmapping.
 @Controller
@@ -37,6 +42,12 @@ public class UserController {
         return mv;
     }
 
+    @GetMapping("/home")
+    public ModelAndView home() {
+        ModelAndView mv = new ModelAndView("user/home");
+        return mv;
+    }
+
 
     @GetMapping("/user/register")
     public ModelAndView Novo(UserRegister request) {
@@ -51,10 +62,12 @@ public class UserController {
             mv.addObject("usuario", request);
             return mv;
         }
+
         else{
             User user = request.ToUser();
             this.userRepository.save(user);
             return new ModelAndView("redirect:/user");
+
         }
     }
 
@@ -63,6 +76,7 @@ public class UserController {
         ModelAndView modelAndView = new ModelAndView("user/login");
         modelAndView.addObject("userLogin", new UserLogin()); // Cria um novo objeto UserLogin
         return modelAndView;
+
     }
 
     @PostMapping("/login")
@@ -73,9 +87,11 @@ public class UserController {
             mv.addObject("usuario", login);
             return mv;
         }
+
         User user = userService.login(login);
         if(user != null){
             mv.setViewName("redirect:/user");
+
         }
         else{
 
@@ -84,8 +100,17 @@ public class UserController {
             mv.addObject("userLogin", login); // Retorna o objeto login para preencher os campos
         }
 
-
         ModelAndView modelAndView = new ModelAndView("redirect:/user");
         return modelAndView;
     }
+
+ /*   @PostMapping("/post")
+    public ModelAndView createPost(@Valid @ModelAttribute("dTOPost")DTOPost post, BindingResult bindingResult) {
+        ModelAndView mv = new ModelAndView();
+
+
+        ModelAndView modelAndView = new ModelAndView("redirect:/home");
+        return modelAndView;
+    }*/
 }
+
